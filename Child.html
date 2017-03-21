@@ -1,0 +1,131 @@
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>untitled</title>
+<meta name="robots" content="noindex">
+<style type="text/css">
+h1 {
+    float: right;
+    width: 10em;
+    text-align: right;
+    margin: 0 .5em 0 0;
+}
+
+#demoInfo {
+    margin-top: 2em;
+}
+</style>
+</head>
+<body>
+
+<h1>Child1</h1>
+
+<form action="#" id="iframeDemoForm">
+    
+    <p><input type="text" name="display" size="30" readonly="readonly"></p>
+    <p><input name="button1" type="button" value="Click Me"> to see offsetHeight of iframe element containing this document</p>
+    
+    <p><input name="button2" type="button" value="Click Me"> repeatedly to increment global variable in containing document</p>
+    
+    <p><input name="button3" type="button" value="Click Me"> to transfer Greeting below to text box above</p>
+    
+    <p><input name="button4" type="button" value="Click Me"> to empty Greeting text box below (calls function in parent)</p>
+
+</form>
+
+
+
+<script type="text/javascript">
+// check for browser support
+if ( window.addEventListener ) {
+    
+    // onload
+    window.addEventListener('load', function() {
+        // get reference to form to attach button onclick handlers
+        var form = document.getElementById('iframeDemoForm');
+        // where to send messages with postMessage
+        //var target_origin = 'http://localhost:9080';
+        
+        var target_origin = '*';
+        
+        
+        // display offsetHeight of iframe containing this document
+        form.elements.button1.onclick = function() {
+            parent.postMessage( {'task': 'height'}, target_origin );
+        }
+        
+        // increment and display counter variable contained in parent document
+        form.elements['button2'].onclick = function() {
+            parent.postMessage( {'task': 'ctr'}, target_origin );
+        }
+        
+        // get value of parent doc's text box
+        form.elements.button3.onclick = function() {
+            parent.postMessage( {'task': 'val'}, target_origin );
+        }
+        
+        // empty parent doc's text box
+        form.elements.button4.onclick = function() {
+            parent.postMessage( {'task': 'clear'}, target_origin );
+        }
+        
+    }, false);
+    
+    
+    // message handler
+    window.addEventListener('message', function(e) {
+        // check message origin
+        if ( e.origin === 'http://localhost:9080') {
+            
+            var task = e.data['task']; // task received in postMessage
+            // get reference to demo form
+            var form = document.getElementById('iframeDemoForm');
+            
+            switch ( task ) { // postMessage tasks
+                // display height received in postMessage
+                case 'height' :
+                    form.elements.display.value = 'OffsetHeight of the iframe is: ' + e.data['height'] + 'px';
+                    break;
+                
+                // display counter received in postMessage
+                case 'ctr' :
+                    form.elements.display.value = 'counter in parent document is: ' + e.data['counter'];
+                    break;
+                
+                // display text box value received in postMessage
+                case 'val' :
+                    form.elements.display.value = 'The greeting is: ' + e.data['val'];
+                    break;
+                
+                case 'clear' :
+                    // nothing to do for this one
+                    break;
+                
+                //default:
+                    
+            }
+            
+        }
+    }, false);
+}
+
+
+(function() {
+    
+    // disable submission of all forms on this page
+    for (var i=0, len=document.forms.length; i<len; i++) {
+        document.forms[i].onsubmit = function() { return false; };
+    }
+    
+}());
+</script>
+
+<p id="demoInfo"><span class="news">Note</span>: This page is part of a tutorial on postMessage and is intended to display in an iframe. <a href="http://www.dyn-web.com/tutorials/iframes/postmessage/access/parent.php">Click here</a> to see it in its proper context.</p>
+
+<script type="text/javascript">
+// if not in iframe, display link to tutorial
+if ( self === top ) {
+    document.getElementById('demoInfo').style.display = 'block';
+}
+</script>
+
+</body></html>
